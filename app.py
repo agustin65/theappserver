@@ -4,7 +4,7 @@ from flask_cors import CORS
 
 pyautogui.FAILSAFE = False
 
-variable = 3
+Counter = 20
 
 X0 = -1
 Y0 = -1
@@ -16,13 +16,15 @@ CORS(app)
 
 @app.route('/move', methods=['POST'])
 def Move():
+    global Counter
+    Counter += 1
     X = request.json['x']
     Y = request.json['y']
     if(-1 < X and X < 1 and -1 < Y and Y < 1):
         screenWidth, screenHeight = pyautogui.size()
         currentMouseX, currentMouseY = pyautogui.position()
-        moveX = currentMouseX + (X * screenWidth / variable)
-        moveY = currentMouseY + (Y * screenHeight / variable)
+        moveX = currentMouseX + (X * screenWidth * (0.3-0.3*pow(X,2)) )
+        moveY = currentMouseY + (Y * screenHeight * (0.3-0.3*pow(Y,2)) )
         if(0 > moveY):
             moveY = 0
         if(0 > moveX):
@@ -34,9 +36,12 @@ def Move():
         pyautogui.moveTo(moveX,moveY)
     return 'ok'
 
-@app.route('/click')
-def Click():
-    pyautogui.click()
+@app.route('/stop', methods=['POST'])
+def Stop():
+    global Counter
+    if(Counter < 4):
+        pyautogui.click()
+    Counter = 0
     return 'ok'
 
 
